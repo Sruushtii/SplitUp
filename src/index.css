@@ -1,0 +1,22 @@
+/* =========================
+   File: index.css
+
+   SUMMARY:
+   This is the main CSS file for the SplitUp app. It sets up global styles and imports Tailwind CSS layers (base, components, utilities). This file is imported in main.jsx and applies styles to the whole app.
+
+   CONNECTIONS:
+   - Imported in main.jsx
+   - Uses Tailwind CSS for utility classes
+   - Affects all components and pages
+   ========================= */
+
+html {
+  scroll-behavior: smooth; /* Makes page scroll smoothly when using anchor links */
+}
+
+/* Import Tailwind CSS base styles (resets, typography, etc.) */
+@tailwind base;
+/* Import Tailwind CSS component classes (buttons, forms, etc.) */
+@tailwind components;
+/* Import Tailwind CSS utility classes (margin, padding, color, etc.) */
+@tailwind utilities;
