@@ -25,10 +25,11 @@ function Navbar({ user, setUser }) {
     };
   }, [isOpen]);
 
-  // Navigation links
+  // Navigation links - Orders only shown to logged-in users
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Plans', href: '/plans' },
+    ...(user ? [{ name: 'Orders', href: '/orders' }] : []),
     { name: 'Reviews', href: '/#testimonials' },
     { name: 'Blog', href: '/blog' }
   ];
