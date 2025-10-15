@@ -312,7 +312,7 @@ VIEW ORDERS FLOW:
 User → Orders Page → Query Firestore → Filter by Email → Display Orders
 
 ADMIN FLOW:
-Admin → LoginPage → Admin Mode → Hardcoded Check → Admin Portal → Manage All Orders
+Admin → LoginPage → Admin Mode → Hardcoded Check → Admin Portal → Manage All Orderss
 
 🔒 7. SECURITY FEATURES
 =======================
