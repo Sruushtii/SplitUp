@@ -14,7 +14,7 @@ SplitUp is a comprehensive subscription sharing platform that enables students a
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React 18.3.1** - Modern React with hooks
+- **React 18.3.1** - Modern React with hook
 - **Vite 6.0.1** - Fast build tool and development server
 - **Tailwind CSS 3.4.16** - Utility-first CSS framework
 - **React Router 7.6.2** - Client-side routing
