@@ -1,6 +1,6 @@
 // Admin Portal - Dashboard for managing orders and users
 import React, { useState, useEffect } from 'react';
-import { db, collection, getDocs, updateDoc, doc, addDoc } from '../services/firebase';
+import { db, collection, getDocs, updateDoc, doc } from '../services/firebase';
 
 // Status colors
 const statusColors = {
@@ -25,57 +25,6 @@ function AdminPortal({ user }) {
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
-  };
-
-  // Add sample data for testing
-  const addSampleData = async () => {
-    if (!user || !user.isAdmin) return;
-    
-    try {
-      const sampleOrders = [
-        {
-          name: "John Doe",
-          email: "john@example.com",
-          phone: "9876543210",
-          subscriptionType: "Netflix",
-          planType: "Premium 4K + HDR",
-          numberOfPeople: "5 people",
-          amountPaid: 139,
-          amountRemaining: 510,
-          totalAmount: 649,
-          paymentMethod: "UPI",
-          status: "pending",
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          name: "Jane Smith",
-          email: "jane@example.com",
-          phone: "9876543211",
-          subscriptionType: "Spotify",
-          planType: "Premium Family",
-          numberOfPeople: "6 people",
-          amountPaid: 34,
-          amountRemaining: 165,
-          totalAmount: 199,
-          paymentMethod: "Card",
-          status: "active",
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      ];
-
-      for (const order of sampleOrders) {
-        await addDoc(collection(db, 'payments'), order);
-      }
-      
-      showToast('Sample data added successfully', 'success');
-      // Refresh orders
-      window.location.reload();
-    } catch (err) {
-      console.error('Error adding sample data:', err);
-      showToast('Failed to add sample data', 'error');
-    }
   };
 
   // Fetch orders from Firebase
@@ -295,14 +244,9 @@ function AdminPortal({ user }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <div className="flex gap-2">
-          <button className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors text-sm" onClick={addSampleData}>
-            Add Sample Data
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors" onClick={() => setShowGroupModal(true)}>
-            Manage Groups
-          </button>
-        </div>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors" onClick={() => setShowGroupModal(true)}>
+          Manage Groups
+        </button>
       </div>
       {/* Orders table */}
       <div className="w-full max-w-4xl mx-auto overflow-x-auto border-b border-slate-200 mb-10 bg-white rounded-xl shadow-sm">

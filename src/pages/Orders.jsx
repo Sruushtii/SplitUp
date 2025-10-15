@@ -66,8 +66,15 @@ function Orders({ user }) {
       const logoMap = {
         'netflix': '/netflix.png',
         'spotify': '/spotify2.png',
-        'prime video': '/primevideo2.png',
+        'primevideo': '/primevideo2.png',
+        'jiohotstar': '/hotstar.webp',
         'hotstar': '/hotstar.webp',
+        'youtubepremium': '/youtube.png',
+        'youtube': '/youtube.png',
+        'canvapro': '/canva.png',
+        'canva': '/canva.png',
+        'microsoft365': '/microsoft.png',
+        'microsoft': '/microsoft.png',
       };
       return logoMap[name] || `/${name}.png`;
     }

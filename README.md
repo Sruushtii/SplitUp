@@ -4,7 +4,7 @@ SplitUp is a comprehensive subscription sharing platform that enables students a
 
 ## 🚀 Features
 
-- **Multi-Service Support**: Netflix, Spotify, Prime Video, Hotstar
+- **Multi-Service Support**: Netflix, Spotify, Prime Video, JioHotstar, YouTube Premium, Canva Pro, Microsoft 365
 - **Secure Payment Processing**: Cost splitting with automated group management
 - **User Management**: Role-based access (User, Admin, Super Admin)
 - **Admin Portal**: Complete order management and user analytics
@@ -174,11 +174,14 @@ firebase deploy
 
 ## 🎯 Key Features Explained
 
-### Subscription Plans
-- **Netflix**: Basic (₹199), Standard (₹499), Premium (₹649)
-- **Spotify**: Individual (₹119), Duo (₹149), Family (₹179)
-- **Prime Video**: Plans available
-- **Hotstar**: Plans available
+### Subscription Plans (2025 Pricing)
+- **Netflix**: Premium (₹649/month)
+- **Spotify**: Premium (₹119/month)
+- **Prime Video**: Monthly (₹299/month)
+- **JioHotstar**: Premium Ad-Free (₹299/month)
+- **YouTube Premium**: Family (₹299/month)
+- **Canva Pro**: Pro Team (₹500/month)
+- **Microsoft 365**: Family Annual (₹8,199/year or ₹684/month)
 
 ### Cost Splitting Algorithm
 Users are automatically matched into groups to share subscription costs, providing up to 83% savings on individual plans.
