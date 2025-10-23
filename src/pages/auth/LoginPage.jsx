@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { auth, db, googleProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, doc, setDoc, getDoc, serverTimestamp } from '../../services/firebase';
+import { sendWelcomeEmail } from '../../services/emailService';
 
 function LoginPage({ user, setUser }) {
   const [searchParams] = useSearchParams();
@@ -35,7 +36,9 @@ function LoginPage({ user, setUser }) {
       const user = result.user;
       const userRef = doc(db, 'users', user.uid);
       const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) {
+      const isNewUser = !userSnap.exists();
+      
+      if (isNewUser) {
         const userData = {
           uid: user.uid,
           name: user.displayName || '',
@@ -45,9 +48,22 @@ function LoginPage({ user, setUser }) {
           provider: user.providerData && user.providerData[0] ? user.providerData[0].providerId : 'google',
           createdAt: serverTimestamp(),
         };
-        // Save user to mock database
+        // Save user to database
         await setDoc(userRef, userData);
+        
+        // Send welcome email to new user
+        try {
+          await sendWelcomeEmail({
+            email: user.email,
+            name: user.displayName || user.email.split('@')[0]
+          });
+          console.log('✅ Welcome email sent to:', user.email);
+        } catch (emailError) {
+          console.error('⚠️ Failed to send welcome email:', emailError);
+          // Don't block signup if email fails
+        }
       }
+      
       if (setUser) setUser(user);
       // If booking flow in progress, redirect to plans
       if (sessionStorage.getItem('splitup_redirect_plan') !== null) {
@@ -125,6 +141,19 @@ function LoginPage({ user, setUser }) {
           provider: 'password',
           createdAt: serverTimestamp(),
         });
+        
+        // Send welcome email to new user
+        try {
+          await sendWelcomeEmail({
+            email: user.email,
+            name: name
+          });
+          console.log('✅ Welcome email sent to:', user.email);
+        } catch (emailError) {
+          console.error('⚠️ Failed to send welcome email:', emailError);
+          // Don't block signup if email fails
+        }
+        
         if (setUser) setUser(user);
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, password);

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import UserDetailsForm from './UserDetailsForm';
 import { db, collection, addDoc, serverTimestamp } from '../services/firebase';
 import { useNavigate } from 'react-router-dom';
+import { sendOrderConfirmationEmail, sendAdminNotificationEmail } from '../services/emailService';
 
 // Available subscriptions with latest pricing (2025)
 // Each service can have multiple plan options
@@ -390,7 +391,7 @@ function Plans({ user, setUser }) {
       setLoading(true);
       setError('');
       try {
-        await addDoc(collection(db, 'payments'), {
+        const orderData = {
           name: userDetails?.name,
           email: userDetails?.email,
           phone: userDetails?.phone,
@@ -406,7 +407,29 @@ function Plans({ user, setUser }) {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           status: 'pending',
-        });
+        };
+        
+        // Save order to database
+        await addDoc(collection(db, 'payments'), orderData);
+        
+        // Send order confirmation email to user
+        try {
+          await sendOrderConfirmationEmail(orderData);
+          console.log('✅ Order confirmation email sent to:', orderData.email);
+        } catch (emailError) {
+          console.error('⚠️ Failed to send order confirmation email:', emailError);
+          // Don't block order if email fails
+        }
+        
+        // Send notification email to admin
+        try {
+          await sendAdminNotificationEmail(orderData);
+          console.log('✅ Admin notification email sent');
+        } catch (emailError) {
+          console.error('⚠️ Failed to send admin notification:', emailError);
+          // Don't block order if admin email fails
+        }
+        
         setSuccessMsg('Payment Successful!');
         setShowPayment(false);
         setTimeout(() => {
