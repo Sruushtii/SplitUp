@@ -2,7 +2,7 @@
 import emailjs from '@emailjs/browser';
 
 // EmailJS Configuration
-const EMAILJS_SERVICE_ID = 'service_0a2a3ne';
+const EMAILJS_SERVICE_ID = 'service_bwrpz71';
 const EMAILJS_TEMPLATE_ID_WELCOME = 'template_b1t12zc';
 const EMAILJS_TEMPLATE_ID_ORDER = 'template_mlx5x01';
 const EMAILJS_PUBLIC_KEY = 'RinVF_y43aRy28WWh';
