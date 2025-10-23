@@ -1,33 +1,37 @@
-// Email service - calls serverless API to send emails
-// This avoids exposing API keys in the browser
+// Email service using EmailJS - No domain verification needed!
+import emailjs from '@emailjs/browser';
 
-const API_ENDPOINT = '/api/send-email';
+// EmailJS Configuration
+// Get these from: https://dashboard.emailjs.com/
+const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID_WELCOME = 'YOUR_WELCOME_TEMPLATE_ID';
+const EMAILJS_TEMPLATE_ID_ORDER = 'YOUR_ORDER_TEMPLATE_ID';
+const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
+
+// Initialize EmailJS
+emailjs.init(EMAILJS_PUBLIC_KEY);
 
 /**
  * Send welcome email to new users
  * @param {Object} userData - User data containing email, name
- * @returns {Promise} - API response
+ * @returns {Promise} - EmailJS response
  */
 export const sendWelcomeEmail = async (userData) => {
   try {
-    const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: 'welcome',
-        data: userData,
-      }),
-    });
+    const templateParams = {
+      to_email: userData.email,
+      to_name: userData.name || 'there',
+      subject: 'Welcome to SplitUp!',
+    };
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID_WELCOME,
+      templateParams
+    );
 
-    const result = await response.json();
-    console.log('✅ Welcome email sent successfully:', result);
-    return result;
+    console.log('✅ Welcome email sent successfully:', response);
+    return response;
   } catch (error) {
     console.error('❌ Error sending welcome email:', error);
     throw error;
@@ -37,28 +41,30 @@ export const sendWelcomeEmail = async (userData) => {
 /**
  * Send order confirmation email to users
  * @param {Object} orderData - Order data containing user and subscription details
- * @returns {Promise} - API response
+ * @returns {Promise} - EmailJS response
  */
 export const sendOrderConfirmationEmail = async (orderData) => {
   try {
-    const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: 'order',
-        data: orderData,
-      }),
-    });
+    const templateParams = {
+      to_email: orderData.email,
+      to_name: orderData.name,
+      subscription_type: orderData.subscriptionType,
+      plan_type: orderData.planType,
+      amount_paid: orderData.amountPaid,
+      amount_remaining: orderData.amountRemaining,
+      total_amount: orderData.totalAmount,
+      payment_method: orderData.paymentMethod,
+      number_of_people: orderData.numberOfPeople,
+    };
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID_ORDER,
+      templateParams
+    );
 
-    const result = await response.json();
-    console.log('✅ Order confirmation email sent successfully:', result);
-    return result;
+    console.log('✅ Order confirmation email sent successfully:', response);
+    return response;
   } catch (error) {
     console.error('❌ Error sending order confirmation email:', error);
     throw error;
@@ -68,28 +74,27 @@ export const sendOrderConfirmationEmail = async (orderData) => {
 /**
  * Send admin notification email when new order is placed
  * @param {Object} orderData - Order data
- * @returns {Promise} - API response
+ * @returns {Promise} - EmailJS response
  */
 export const sendAdminNotificationEmail = async (orderData) => {
   try {
-    const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: 'admin',
-        data: orderData,
-      }),
-    });
+    const templateParams = {
+      to_email: 'admin@gmail.com',
+      customer_name: orderData.name,
+      customer_email: orderData.email,
+      subscription_type: orderData.subscriptionType,
+      plan_type: orderData.planType,
+      total_amount: orderData.totalAmount,
+    };
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID_ORDER,
+      templateParams
+    );
 
-    const result = await response.json();
-    console.log('✅ Admin notification email sent successfully:', result);
-    return result;
+    console.log('✅ Admin notification email sent successfully:', response);
+    return response;
   } catch (error) {
     console.error('❌ Error sending admin notification email:', error);
     // Don't throw error for admin notifications - it shouldn't block user flow
