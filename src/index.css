@@ -20,3 +20,4 @@ html {
 @tailwind components;
 /* Import Tailwind CSS utility classes (margin, padding, color, etc.) */
 @tailwind utilities;
+

@@ -1,37 +1,95 @@
-// Navigation bar with responsive design and admin support
+// =========================
+// File: Navbar.jsx
+//
+// SUMMARY:
+// This is the main navigation bar component for SplitUp. It provides responsive navigation
+// with different layouts for regular users and admin users. The navbar includes the logo,
+// navigation links, authentication buttons, and mobile menu functionality.
+//
+// WHAT IT DOES:
+// - Displays the SplitUp logo and brand name
+// - Shows navigation links (Home, Plans, Orders, Reviews, Blog)
+// - Handles user authentication state (login/logout buttons)
+// - Provides different navigation for admin users
+// - Implements responsive mobile menu with hamburger button
+// - Handles smooth scrolling to page sections
+//
+// WHY IT'S IMPORTANT:
+// - Primary navigation interface for the entire application
+// - Provides consistent user experience across all pages
+// - Handles authentication state visually for users
+// - Ensures accessibility on both desktop and mobile devices
+//
+// HOW IT WORKS:
+// - Receives user state from parent App component
+// - Conditionally renders different content based on user type
+// - Uses React Router for navigation between pages
+// - Implements click-outside detection for mobile menu
+// - Handles logout functionality for both regular and admin users
+// =========================
+
+// Import React hooks for state management and side effects
 import React, { useState, useRef, useEffect } from 'react';
+// Import React Router components for navigation
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+// Import Firebase authentication service
 import { auth } from '../services/firebase';
 
 function Navbar({ user, setUser }) {
+  // =========================
+  // STATE AND HOOKS
+  // =========================
+  
+  // State to control mobile menu visibility (open/closed)
   const [isOpen, setIsOpen] = useState(false);
+  // Ref to the mobile menu DOM element for click-outside detection
   const menuRef = useRef(null);
+  // Function to toggle mobile menu open/closed state
   const toggleMenu = () => setIsOpen(!isOpen);
+  // Hook to get current page location (for conditional behavior)
   const location = useLocation();
+  // Hook for programmatic navigation
   const navigate = useNavigate();
-  // Close mobile menu on outside click
+  
+  // =========================
+  // MOBILE MENU CLICK-OUTSIDE DETECTION
+  // =========================
+  
+  // Effect to close mobile menu when user clicks outside of it
   useEffect(() => {
+    // Only set up listeners if menu is open
     if (!isOpen) return;
+    
+    // Function to handle clicks outside the menu
     function handleClickOutside(event) {
+      // If click is outside the menu element, close the menu
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
+    
+    // Add event listeners for both mouse and touch events
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
+    
+    // Cleanup function to remove event listeners
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen]); // Re-run effect when isOpen state changes
 
-  // Navigation links - Orders only shown to logged-in users
+  // =========================
+  // NAVIGATION CONFIGURATION
+  // =========================
+  
+  // Define navigation links - Orders link only shown to logged-in users
   const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Plans', href: '/plans' },
-    ...(user ? [{ name: 'Orders', href: '/orders' }] : []),
-    { name: 'Reviews', href: '/#testimonials' },
-    { name: 'Blog', href: '/blog' }
+    { name: 'Home', href: '/' },                                    // Landing page
+    { name: 'Plans', href: '/plans' },                              // Subscription plans
+    ...(user ? [{ name: 'Orders', href: '/orders' }] : []),         // User orders (conditional)
+    { name: 'Reviews', href: '/#testimonials' },                    // Testimonials section
+    { name: 'Blog', href: '/blog' }                                 // Blog page (placeholder)
   ];
 
   // Handle logout for both users and admins

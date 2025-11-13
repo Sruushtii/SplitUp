@@ -1,13 +1,43 @@
-// Email service using EmailJS - No domain verification needed!
+// =========================
+// File: emailService.js
+//
+// SUMMARY:
+// This service handles all email functionality for SplitUp using EmailJS. EmailJS allows sending
+// emails directly from the frontend without needing a backend server or domain verification.
+// It manages welcome emails, order confirmations, and admin notifications.
+//
+// WHAT IT DOES:
+// - Sends welcome emails to new users
+// - Sends order confirmation emails with subscription details
+// - Sends admin notification emails for new orders
+//
+// WHY IT'S IMPORTANT:
+// - Provides professional communication with users
+// - Confirms successful transactions and builds trust
+// - Keeps admins informed of new business
+// - No backend server required - works entirely from frontend
+//
+// HOW IT WORKS:
+// - Uses EmailJS service with pre-configured email templates
+// - Templates are set up in EmailJS dashboard with dynamic variables
+// - Functions format data and send via EmailJS API
+// - Error handling ensures user flow isn't disrupted by email failures
+// =========================
+
+// Import EmailJS browser library for client-side email sending
 import emailjs from '@emailjs/browser';
 
-// EmailJS Configuration
-const EMAILJS_SERVICE_ID = 'service_bwrpz71';
-const EMAILJS_TEMPLATE_ID_WELCOME = 'template_b1t12zc';
-const EMAILJS_TEMPLATE_ID_ORDER = 'template_mlx5x01';
-const EMAILJS_PUBLIC_KEY = 'RinVF_y43aRy28WWh';
+// =========================
+// EMAILJS CONFIGURATION
+// =========================
 
-// Initialize EmailJS
+// EmailJS service configuration - these IDs are from EmailJS dashboard
+const EMAILJS_SERVICE_ID = 'service_a15iq4h';   //service_a15iq4h      // EmailJS service identifier
+const EMAILJS_TEMPLATE_ID_WELCOME = 'template_oef19xj'; //template_oef19xj // Welcome email template
+const EMAILJS_TEMPLATE_ID_ORDER = 'template_rzlqcgf';   // Order confirmation template
+const EMAILJS_PUBLIC_KEY = 'jN2G0MW074qCNUZAV';         // Public key for authentication
+
+// Initialize EmailJS with public key for authentication
 emailjs.init(EMAILJS_PUBLIC_KEY);
 
 /**
@@ -29,10 +59,10 @@ export const sendWelcomeEmail = async (userData) => {
       templateParams
     );
 
-    console.log('✅ Welcome email sent successfully:', response);
+    console.log(' Welcome email sent successfully:', response);
     return response;
   } catch (error) {
-    console.error('❌ Error sending welcome email:', error);
+    console.error(' Error sending welcome email:', error);
     throw error;
   }
 };
@@ -62,41 +92,11 @@ export const sendOrderConfirmationEmail = async (orderData) => {
       templateParams
     );
 
-    console.log('✅ Order confirmation email sent successfully:', response);
+    console.log(' Order confirmation email sent successfully:', response);
     return response;
   } catch (error) {
-    console.error('❌ Error sending order confirmation email:', error);
+    console.error(' Error sending order confirmation email:', error);
     throw error;
   }
 };
 
-/**
- * Send admin notification email when new order is placed
- * @param {Object} orderData - Order data
- * @returns {Promise} - EmailJS response
- */
-export const sendAdminNotificationEmail = async (orderData) => {
-  try {
-    const templateParams = {
-      to_email: 'admin@gmail.com',
-      customer_name: orderData.name,
-      customer_email: orderData.email,
-      subscription_type: orderData.subscriptionType,
-      plan_type: orderData.planType,
-      total_amount: orderData.totalAmount,
-    };
-
-    const response = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID_ORDER,
-      templateParams
-    );
-
-    console.log('✅ Admin notification email sent successfully:', response);
-    return response;
-  } catch (error) {
-    console.error('❌ Error sending admin notification email:', error);
-    // Don't throw error for admin notifications - it shouldn't block user flow
-    return null;
-  }
-};

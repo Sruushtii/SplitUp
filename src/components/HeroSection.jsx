@@ -1,16 +1,56 @@
+// =========================
+// File: HeroSection.jsx
+//
+// SUMMARY:
+// This component renders the main hero section and "How it Works" section for the SplitUp homepage.
+// It includes the primary value proposition, call-to-action buttons, and a 4-step process explanation
+// that helps users understand how the subscription sharing platform works.
+//
+// WHAT IT DOES:
+// - Displays the main headline and value proposition
+// - Shows call-to-action buttons (Get Started, How it Works)
+// - Renders an avatar image to make the page more engaging
+// - Explains the 4-step process of using SplitUp
+// - Provides smooth scrolling navigation within the page
+//
+// WHY IT'S IMPORTANT:
+// - First impression for visitors - needs to clearly communicate value
+// - Drives user conversion with clear CTAs
+// - Educates users on how the platform works
+// - Builds trust with VIT Pune branding
+//
+// HOW IT WORKS:
+// - Uses responsive design for mobile and desktop
+// - Links to /plans page for user conversion
+// - Implements smooth scrolling to "How it Works" section
+// - Uses custom SVG icons for visual appeal
+// =========================
+
+// Import React for component creation
 import React from 'react';
+// Import Link component for navigation to other pages
 import { Link } from 'react-router-dom';
 
-// Icons for how it works section
+// =========================
+// CUSTOM SVG ICON COMPONENTS
+// =========================
+
+// Icon representing group formation/joining (step 1)
 const GroupIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 17.5C19.433 15.567 19.433 12.433 17.5 10.5C15.567 8.56701 12.433 8.56701 10.5 10.5M6.5 6.5C4.567 8.43301 4.567 11.567 6.5 13.5C8.433 15.433 11.567 15.433 13.5 13.5M14 10L10 14M21 21L19 19M5 5L3 3" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
 );
+
+// Icon representing payment/credit card (step 2)
 const PayIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="6" width="18" height="13" rx="2" stroke="#3B82F6" strokeWidth="2"/><path d="M3 10H21" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round"/></svg>
 );
+
+// Icon representing success/checkmark (step 3)
 const EnjoyIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13.3L8.5 17L19 6" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
 );
+
+// Icon representing refund/money back guarantee (step 4)
 const RefundIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 15L15 12M15 12L12 9M15 12H9" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
 );
