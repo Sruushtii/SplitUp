@@ -32,10 +32,10 @@ import emailjs from '@emailjs/browser';
 // =========================
 
 // EmailJS service configuration - these IDs are from EmailJS dashboard
-const EMAILJS_SERVICE_ID = 'service_a15iq4h';   //service_a15iq4h      // EmailJS service identifier
-const EMAILJS_TEMPLATE_ID_WELCOME = 'template_oef19xj'; //template_oef19xj // Welcome email template
-const EMAILJS_TEMPLATE_ID_ORDER = 'template_rzlqcgf';   // Order confirmation template
-const EMAILJS_PUBLIC_KEY = 'jN2G0MW074qCNUZAV';         // Public key for authentication
+const EMAILJS_SERVICE_ID = 'service_a15iq4h';  
+const EMAILJS_TEMPLATE_ID_WELCOME = 'template_oef19xj';
+const EMAILJS_TEMPLATE_ID_ORDER = 'template_rzlqcgf'; 
+const EMAILJS_PUBLIC_KEY = 'jN2G0MW074qCNUZAV';       
 
 // Initialize EmailJS with public key for authentication
 emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -50,8 +50,13 @@ export const sendWelcomeEmail = async (userData) => {
     const templateParams = {
       to_email: userData.email,
       to_name: userData.name || 'there',
+      from_email: 'kumbharsrushti.01@gmail.com',
+      from_name: 'SplitUp Team',
       subject: 'Welcome to SplitUp!',
     };
+
+    console.log('🔄 Sending welcome email to:', userData.email);
+    console.log('📧 Template params:', templateParams);
 
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
@@ -59,10 +64,11 @@ export const sendWelcomeEmail = async (userData) => {
       templateParams
     );
 
-    console.log(' Welcome email sent successfully:', response);
+    console.log('✅ Welcome email sent successfully:', response);
     return response;
   } catch (error) {
-    console.error(' Error sending welcome email:', error);
+    console.error('❌ Error sending welcome email:', error);
+    console.error('Error details:', error);
     throw error;
   }
 };
@@ -77,6 +83,8 @@ export const sendOrderConfirmationEmail = async (orderData) => {
     const templateParams = {
       to_email: orderData.email,
       to_name: orderData.name,
+      from_email: 'kumbharsrushti.01@gmail.com',
+      from_name: 'SplitUp Team',
       subscription_type: orderData.subscriptionType,
       plan_type: orderData.planType,
       amount_paid: orderData.amountPaid,
@@ -86,16 +94,19 @@ export const sendOrderConfirmationEmail = async (orderData) => {
       number_of_people: orderData.numberOfPeople,
     };
 
+    console.log('🔄 Sending order confirmation email to:', orderData.email);
+
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID_ORDER,
       templateParams
     );
 
-    console.log(' Order confirmation email sent successfully:', response);
+    console.log('✅ Order confirmation email sent successfully:', response);
     return response;
   } catch (error) {
-    console.error(' Error sending order confirmation email:', error);
+    console.error('❌ Error sending order confirmation email:', error);
+    console.error('Error details:', error);
     throw error;
   }
 };
