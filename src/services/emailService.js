@@ -111,3 +111,41 @@ export const sendOrderConfirmationEmail = async (orderData) => {
   }
 };
 
+
+/**
+ * Send admin notification email when new order is placed
+ * @param {Object} orderData - Order data
+ * @returns {Promise} - EmailJS response
+ */
+export const sendAdminNotificationEmail = async (orderData) => {
+  try {
+    const templateParams = {
+      to_email: 'kumbharsrushti.01@gmail.com', // Admin email
+      to_name: 'Admin',
+      from_email: 'kumbharsrushti.01@gmail.com',
+      from_name: 'SplitUp System',
+      customer_name: orderData.name,
+      customer_email: orderData.email,
+      subscription_type: orderData.subscriptionType,
+      plan_type: orderData.planType,
+      total_amount: orderData.totalAmount,
+      subject: 'New Order Placed - SplitUp',
+    };
+
+    console.log('🔄 Sending admin notification email...');
+
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID_ORDER, // Using same template as order confirmation
+      templateParams
+    );
+
+    console.log('✅ Admin notification email sent successfully:', response);
+    return response;
+  } catch (error) {
+    console.error('❌ Error sending admin notification email:', error);
+    console.error('Error details:', error);
+    // Don't throw error for admin notifications - it shouldn't block user flow
+    return null;
+  }
+};
