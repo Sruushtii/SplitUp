@@ -52,6 +52,7 @@ export const sendOrderConfirmationEmail = async (orderData) => {
     const templateParams = {
       to_name: orderData.name,
       to_email: orderData.email,
+      email: orderData.email, // Ensure 'email' is set for recipient
       subscription_type: orderData.subscriptionType || '',
       plan_type: orderData.planType || '',
       number_of_people: orderData.numberOfPeople || '',
