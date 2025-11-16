@@ -20,19 +20,12 @@ emailjs.init(EMAILJS_PUBLIC_KEY);
 export const sendWelcomeEmail = async (userData) => {
   try {
     const templateParams = {
-      name: userData.name || 'User',
-      email: userData.email,
       to_name: userData.name || 'User',
       to_email: userData.email,
       from_name: 'Splitup',
       reply_to: 'info.splitup@gmail.com',
-      message: `Welcome to SplitUp! Start saving money on your subscriptions today.`
     };
-    console.log('Sending welcome email to:', userData.email, templateParams);
-    console.log('[EmailJS] Sending welcome email:', {
-      templateId: EMAILJS_TEMPLATE_ID_WELCOME,
-      params: templateParams
-    });
+    console.log('[EmailJS] Welcome:', {templateId: EMAILJS_TEMPLATE_ID_WELCOME, params: templateParams});
     try {
       const response = await emailjs.send(
         EMAILJS_SERVICE_ID,
@@ -57,22 +50,19 @@ export const sendWelcomeEmail = async (userData) => {
 export const sendOrderConfirmationEmail = async (orderData) => {
   try {
     const templateParams = {
-      name: orderData.name,
-      email: orderData.email,
       to_name: orderData.name,
       to_email: orderData.email,
+      subscription_type: orderData.subscriptionType || '',
+      plan_type: orderData.planType || '',
+      number_of_people: orderData.numberOfPeople || '',
+      payment_method: orderData.paymentMethod || '',
+      amount_paid: orderData.amountPaid || '',
+      amount_remaining: orderData.amountRemaining || '',
+      total_amount: orderData.totalAmount || '',
       from_name: 'Splitup',
       reply_to: 'info.splitup@gmail.com',
-      subscription_type: orderData.subscriptionType || 'Subscription',
-      plan_type: orderData.planType || 'Plan',
-      total_amount: orderData.totalAmount || '0',
-      message: `Your ${orderData.subscriptionType} order has been confirmed. Amount: ₹${orderData.totalAmount}`
     };
-    console.log('Sending order confirmation to:', orderData.email);
-    console.log('[EmailJS] Sending order confirmation email:', {
-      templateId: EMAILJS_TEMPLATE_ID_ORDER,
-      params: templateParams
-    });
+    console.log('[EmailJS] Confirmation:', {templateId: EMAILJS_TEMPLATE_ID_ORDER, params: templateParams});
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID_ORDER,
