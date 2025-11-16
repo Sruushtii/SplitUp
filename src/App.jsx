@@ -162,7 +162,7 @@ function App() {
         {/* Blog page - placeholder for blog/articles */}
         <Route path="/blog" element={<DummyPage title="Blog" />} />
         
-        {/* Signup page - placeholder (actual signup is handled in LoginPage) */}
+
         <Route path="/signup" element={<DummyPage title="Sign Up" />} />
         
         {/* My Account page - placeholder for user profile management */}

@@ -9,6 +9,8 @@ const statusColors = {
   completed: 'bg-blue-100 text-blue-800',
 };
 
+import { getServiceNameFromPlanType } from './getServiceNameFromPlanType';
+
 function AdminPortal({ user }) {
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [addAdminMsg, setAddAdminMsg] = useState('');
@@ -232,7 +234,7 @@ function AdminPortal({ user }) {
                         <span className="text-blue-700 font-bold text-lg">{index + 1}</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-slate-900">{group.planType}</h3>
+                        <h3 className="font-bold text-lg text-slate-900">{getServiceNameFromPlanType(group.planType)}</h3>
                         <p className="text-xs text-slate-500">Subscription Group</p>
                       </div>
                     </div>
