@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import UserDetailsForm from './UserDetailsForm';
 import { db, collection, addDoc, serverTimestamp } from '../services/firebase';
 import { useNavigate } from 'react-router-dom';
-import { sendOrderConfirmationEmail, sendAdminNotificationEmail } from '../services/emailService';
+import { sendOrderConfirmationEmail } from '../services/emailService';
 
 // Available subscriptions with latest pricing (2025)
 // Each service can have multiple plan options
