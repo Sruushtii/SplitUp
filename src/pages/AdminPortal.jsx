@@ -192,25 +192,99 @@ function AdminPortal({ user }) {
 
   // Modal for managing groups (UI only, no backend logic)
   const GroupModal = ({ onClose }) => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-2">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full relative animate-fadeInUp p-8">
-        <button className="absolute -top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 shadow text-slate-700 hover:bg-slate-100 hover:text-blue-600 focus:outline-none" onClick={onClose} aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M10 8.586l4.95-4.95a1 1 0 111.414 1.414L11.414 10l4.95 4.95a1 1 0 01-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 01-1.414-1.414L8.586 10l-4.95-4.95A1 1 0 115.05 3.636L10 8.586z" clipRule="evenodd" /></svg>
-        </button>
-        <h2 className="text-xl font-bold mb-4">Manage Groups</h2>
-        <div className="space-y-4">
-          {groups.length === 0 ? <div className="text-slate-400">No groups found.</div> : groups.map(group => (
-            <div key={group.id} className="border rounded-lg p-4">
-              <div className="font-semibold text-blue-700 mb-2">{group.planType}</div>
-              <div className="text-slate-700 text-sm mb-1">Members:</div>
-              <ul className="text-slate-600 text-sm list-disc ml-5">
-                {group.members.map(m => <li key={m.id}>{m.name} ({m.email})</li>)}
-              </ul>
-              <div className="mt-2 text-xs text-slate-400">Group size: {group.members.length}</div>
-            </div>
-          ))}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-6">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full relative animate-fadeInUp flex flex-col max-h-[90vh]">
+        {/* Fixed Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Manage Groups</h2>
+            <p className="text-sm text-slate-500 mt-1">View and manage subscription groups</p>
+          </div>
+          <button 
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400" 
+            onClick={onClose} 
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+              <path fillRule="evenodd" d="M10 8.586l4.95-4.95a1 1 0 111.414 1.414L11.414 10l4.95 4.95a1 1 0 01-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 01-1.414-1.414L8.586 10l-4.95-4.95A1 1 0 115.05 3.636L10 8.586z" clipRule="evenodd" />
+            </svg>
+          </button>
         </div>
-        <button className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full">Create New Group (UI only)</button>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {groups.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <svg className="w-16 h-16 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <p className="text-slate-400 text-lg">No groups found</p>
+              <p className="text-slate-400 text-sm mt-1">Groups will appear here once users place orders</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {groups.map((group, index) => (
+                <div key={group.id} className="border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gradient-to-br from-white to-slate-50">
+                  {/* Group Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span className="text-blue-700 font-bold text-lg">{index + 1}</span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-slate-900">{group.planType}</h3>
+                        <p className="text-xs text-slate-500">Subscription Group</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      <span className="text-sm font-semibold text-blue-700">{group.members.length} {group.members.length === 1 ? 'Member' : 'Members'}</span>
+                    </div>
+                  </div>
+
+                  {/* Members List */}
+                  <div className="bg-white rounded-lg p-4 border border-slate-100">
+                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      Group Members
+                    </h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {group.members.map((member, idx) => (
+                        <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                            {member.name?.charAt(0)?.toUpperCase() || 'U'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-slate-900 truncate">{member.name}</p>
+                            <p className="text-xs text-slate-500 truncate">{member.email}</p>
+                          </div>
+                          <span className="text-xs text-slate-400 font-medium">#{idx + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Fixed Footer */}
+        <div className="p-6 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+          <button 
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 flex items-center justify-center gap-2"
+            onClick={() => showToast('Group creation feature coming soon!', 'success')}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create New Group
+          </button>
+        </div>
       </div>
     </div>
   );

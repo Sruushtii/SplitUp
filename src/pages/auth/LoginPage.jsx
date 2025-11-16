@@ -52,14 +52,20 @@ function LoginPage({ user, setUser }) {
         await setDoc(userRef, userData);
         
         // Send welcome email to new user
+        console.log('🎉 [SIGNUP] New Google user detected, sending welcome email...');
         try {
-          await sendWelcomeEmail({
+          const welcomeEmailData = {
             email: user.email,
-            name: user.displayName || user.email.split('@')[0]
-          });
-          console.log('✅ Welcome email sent to:', user.email);
+            name: user.displayName || user.email.split('@')[0],
+            displayName: user.displayName
+          };
+          console.log('📧 [SIGNUP] Preparing welcome email with data:', welcomeEmailData);
+          
+          await sendWelcomeEmail(welcomeEmailData);
+          console.log('✅ [SIGNUP] Welcome email sent successfully to:', user.email);
         } catch (emailError) {
-          console.error('⚠️ Failed to send welcome email:', emailError);
+          console.error('⚠️ [SIGNUP] Failed to send welcome email to:', user.email);
+          console.error('⚠️ [SIGNUP] Email error details:', emailError);
           // Don't block signup if email fails
         }
       }
@@ -143,14 +149,20 @@ function LoginPage({ user, setUser }) {
         });
         
         // Send welcome email to new user
+        console.log('🎉 [SIGNUP] New email user created, sending welcome email...');
         try {
-          await sendWelcomeEmail({
+          const welcomeEmailData = {
             email: user.email,
-            name: name
-          });
-          console.log('✅ Welcome email sent to:', user.email);
+            name: name,
+            displayName: name
+          };
+          console.log('📧 [SIGNUP] Preparing welcome email with data:', welcomeEmailData);
+          
+          await sendWelcomeEmail(welcomeEmailData);
+          console.log('✅ [SIGNUP] Welcome email sent successfully to:', user.email);
         } catch (emailError) {
-          console.error('⚠️ Failed to send welcome email:', emailError);
+          console.error('⚠️ [SIGNUP] Failed to send welcome email to:', user.email);
+          console.error('⚠️ [SIGNUP] Email error details:', emailError);
           // Don't block signup if email fails
         }
         
