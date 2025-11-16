@@ -9,7 +9,7 @@ import emailjs from '@emailjs/browser';
 const EMAILJS_SERVICE_ID = 'service_wcvg2i3';
 const EMAILJS_TEMPLATE_ID_WELCOME = 'template_k2eb16g';
 const EMAILJS_TEMPLATE_ID_ORDER = 'template_G20ndud';
-const EMAILJS_PUBLIC_KEY = 'IL5P2ZqG4phJcJz6B';
+const EMAILJS_PUBLIC_KEY = 'lL5P2ZqG4phJcJz6B';
 
 // Initialize EmailJS
 emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -28,14 +28,19 @@ export const sendWelcomeEmail = async (userData) => {
       reply_to: 'info.splitup@gmail.com',
       message: `Welcome to SplitUp! Start saving money on your subscriptions today.`
     };
-    console.log('Sending welcome email to:', userData.email);
-    const response = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID_WELCOME,
-      templateParams
-    );
-    console.log('Welcome email sent successfully');
-    return response;
+    console.log('Sending welcome email to:', userData.email, templateParams);
+    try {
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID_WELCOME,
+        templateParams
+      );
+      console.log('Welcome email sent successfully', response);
+      return response;
+    } catch (err) {
+      console.error('EmailJS send error:', err);
+      throw err;
+    }
   } catch (error) {
     console.error('Welcome email failed:', error);
     return null;

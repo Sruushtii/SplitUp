@@ -420,16 +420,7 @@ function Plans({ user, setUser }) {
           console.error('⚠️ Failed to send order confirmation email:', emailError);
           // Don't block order if email fails
         }
-        
-        // Send notification email to admin
-        try {
-          await sendAdminNotificationEmail(orderData);
-          console.log('✅ Admin notification email sent');
-        } catch (emailError) {
-          console.error('⚠️ Failed to send admin notification:', emailError);
-          // Don't block order if admin email fails
-        }
-        
+
         setSuccessMsg('Payment Successful!');
         setShowPayment(false);
         setTimeout(() => {
@@ -441,7 +432,7 @@ function Plans({ user, setUser }) {
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-2 sm:px-0">
