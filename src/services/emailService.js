@@ -8,7 +8,7 @@ import emailjs from '@emailjs/browser';
 // EmailJS Configuration - Updated with correct credentials
 const EMAILJS_SERVICE_ID = 'service_wcvg2i3';
 const EMAILJS_TEMPLATE_ID_WELCOME = 'template_k2eb16g';
-const EMAILJS_TEMPLATE_ID_ORDER = 'template_G20ndud';
+const EMAILJS_TEMPLATE_ID_ORDER = 'template_620ndud';
 const EMAILJS_PUBLIC_KEY = 'lL5P2ZqG4phJcJz6B';
 
 // Initialize EmailJS
@@ -29,6 +29,10 @@ export const sendWelcomeEmail = async (userData) => {
       message: `Welcome to SplitUp! Start saving money on your subscriptions today.`
     };
     console.log('Sending welcome email to:', userData.email, templateParams);
+    console.log('[EmailJS] Sending welcome email:', {
+      templateId: EMAILJS_TEMPLATE_ID_WELCOME,
+      params: templateParams
+    });
     try {
       const response = await emailjs.send(
         EMAILJS_SERVICE_ID,
@@ -65,6 +69,10 @@ export const sendOrderConfirmationEmail = async (orderData) => {
       message: `Your ${orderData.subscriptionType} order has been confirmed. Amount: ₹${orderData.totalAmount}`
     };
     console.log('Sending order confirmation to:', orderData.email);
+    console.log('[EmailJS] Sending order confirmation email:', {
+      templateId: EMAILJS_TEMPLATE_ID_ORDER,
+      params: templateParams
+    });
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID_ORDER,
