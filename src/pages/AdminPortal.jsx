@@ -82,7 +82,8 @@ function AdminPortal({ user }) {
     const groupMap = {};
     orders.forEach(order => {
       if (!order.planType) return;
-      if (order.status !== 'pending') return; // Only include pending users
+      // Only show users who have fully paid (amountRemaining === 0) and are pending
+      if (order.status !== 'pending' || order.amountRemaining > 0) return;
       if (!groupMap[order.planType]) groupMap[order.planType] = [];
       groupMap[order.planType].push(order);
     });
@@ -146,6 +147,10 @@ function AdminPortal({ user }) {
             console.error('Failed to update status for', member.email, updateErr);
           }
         }
+        // Also update local state for immediate UI feedback
+        setOrders(prevOrders => prevOrders.map(order =>
+          order.id === member.id ? { ...order, status: 'active', updatedAt: new Date() } : order
+        ));
         successCount++;
       } catch (err) {
         failCount++;
@@ -441,6 +446,45 @@ function AdminPortal({ user }) {
           Manage Groups
         </button>
       </div>
+      {/* Fully Paid Orders Summary */}
+      <div className="w-full max-w-4xl mx-auto mb-6">
+        {(() => {
+          const fullyPaid = orders.filter(o => o.amountRemaining === 0);
+          const showAllLimit = 20;
+          const [showAll, setShowAll] = React.useState(false);
+          if (fullyPaid.length === 0) return null;
+          const displayed = showAll ? fullyPaid : fullyPaid.slice(0, showAllLimit);
+          return (
+            <div className="mb-4 p-4 bg-green-50 border border-green-100 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-green-700 text-sm">
+                  Fully Paid Orders <span className="ml-2 text-xs text-green-900 bg-green-200 rounded px-2 py-0.5">{fullyPaid.length}</span>
+                </span>
+                {fullyPaid.length > showAllLimit && (
+                  <button
+                    className="text-xs text-blue-700 underline hover:text-blue-900 px-2 py-1"
+                    onClick={() => setShowAll(v => !v)}
+                  >
+                    {showAll ? 'Show Less' : `Show All (${fullyPaid.length})`}
+                  </button>
+                )}
+              </div>
+              <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-green-200 scrollbar-track-green-50">
+                <div className="flex gap-3" style={{ minWidth: 'fit-content' }}>
+                  {displayed.map(o => (
+                    <div key={o.id} className="px-4 py-3 bg-white border border-green-200 rounded shadow-sm flex flex-col min-w-[200px] max-w-xs">
+                      <div className="font-bold text-slate-800 text-base truncate mb-1">{o.name}</div>
+                      <div className="text-xs text-slate-500 truncate mb-1">{o.email}</div>
+                      <div className="text-xs text-green-700 font-semibold mb-2 truncate">{getServiceNameFromPlanType(o.planType) || o.subscriptionType}</div>
+                      <div className="text-green-900 text-sm font-bold">₹{o.amountPaid}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
       {/* Orders table */}
       <div className="w-full max-w-4xl mx-auto overflow-x-auto border-b border-slate-200 mb-10 bg-white rounded-xl shadow-sm">
         {loading ? (
@@ -463,7 +507,7 @@ function AdminPortal({ user }) {
                 <tr key={order.id} className="border-b border-slate-100 hover:bg-blue-50 cursor-pointer transition" style={{height: '56px'}} onClick={() => setSelectedOrder(order)}>
                   <td className="px-4 py-2 text-base">{order.name}</td>
                   <td className="px-4 py-2 text-base">{order.email}</td>
-                  <td className="px-4 py-2 text-base">{order.planType || order.subscriptionType}</td>
+                  <td className="px-4 py-2 text-base">{getServiceNameFromPlanType(order.planType) || order.subscriptionType}</td>
                   <td className="px-4 py-2">
                     <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${statusColors[order.status] || 'bg-slate-100 text-slate-700'}`}>{order.status}</span>
                   </td>

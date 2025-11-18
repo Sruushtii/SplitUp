@@ -81,8 +81,63 @@ function Orders({ user }) {
     return null;
   };
 
+  // Minimal modal for paying rest amount
+  const PayRestModal = ({ order, open, onClose, onPaid }) => {
+    const [paymentMethod, setPaymentMethod] = useState('UPI');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    if (!open) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-2 sm:px-0">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-fadeInUp p-8">
+          <button className="absolute -top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 shadow text-slate-700 hover:bg-slate-100 hover:text-blue-600 focus:outline-none" onClick={onClose} aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M10 8.586l4.95-4.95a1 1 0 111.414 1.414L11.414 10l4.95 4.95a1 1 0 01-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 01-1.414-1.414L8.586 10l-4.95-4.95A1 1 0 115.05 3.636L10 8.586z" clipRule="evenodd" /></svg>
+          </button>
+          <h2 className="text-xl font-bold mb-2">Pay Remaining Amount</h2>
+          <div className="mb-4 text-slate-700">Amount remaining to pay: <span className="font-bold text-red-600">₹{order.amountRemaining}</span></div>
+          <div className="mb-4">
+            <label className="block mb-1 text-slate-600 text-sm font-medium">Select payment method</label>
+            <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="w-full px-3 py-2 border rounded">
+              <option value="UPI">UPI</option>
+              <option value="Card">Credit/Debit Card</option>
+              <option value="Netbanking">Netbanking</option>
+            </select>
+          </div>
+          {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
+          <button
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-blue-600 text-white font-bold text-lg shadow hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            onClick={async () => {
+              setLoading(true);
+              setError('');
+              try {
+                // Update payment in Firestore
+                const { updateDoc, doc, db } = await import('../services/firebase');
+                await updateDoc(doc(db, 'payments', order.id), {
+                  amountPaid: (order.amountPaid || 0) + (order.amountRemaining || 0),
+                  amountRemaining: 0,
+                  // Do NOT set status to 'paid', keep as 'pending' until admin sends credentials
+                  status: 'pending',
+                  paymentMethod,
+                  updatedAt: new Date()
+                });
+                onPaid();
+              } catch (e) {
+                setError('Payment failed. Try again.');
+              } finally {
+                setLoading(false);
+              }
+            }}
+          >
+            {loading ? 'Processing...' : `Pay ₹${order.amountRemaining}`}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // Modal for showing order details
-  const OrderDetailsModal = ({ order, onClose }) => {
+  const OrderDetailsModal = ({ order, onClose, onPayRest }) => {
     if (!order) return null;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-2 sm:px-0">
@@ -116,10 +171,39 @@ function Orders({ user }) {
               <li className="py-2 flex justify-between"><span className="text-slate-500">Total Amount</span><span className="font-medium text-slate-800">₹{order.totalAmount}</span></li>
               {order.timestamp && <li className="py-2 flex justify-between"><span className="text-slate-500">Booked On</span><span className="font-medium text-slate-800">{order.timestamp.toDate ? order.timestamp.toDate().toLocaleString() : order.timestamp}</span></li>}
             </ul>
+            {/* Pay Rest Amount button */}
+            {order.amountRemaining > 0 && (order.status === 'pending' || order.status === 'partial') && (
+              <button
+                className="mt-4 w-full py-3 rounded-lg bg-blue-600 text-white font-bold text-lg shadow hover:bg-blue-700 transition-colors"
+                onClick={onPayRest}
+              >
+                Pay Rest Amount (₹{order.amountRemaining})
+              </button>
+            )}
           </div>
         </div>
       </div>
     );
+  };
+
+
+  const [showPayRest, setShowPayRest] = useState(false);
+  const [payRestOrder, setPayRestOrder] = useState(null);
+
+  // Helper to refresh orders after payment
+  const refreshOrders = async () => {
+    if (!user?.email) return;
+    setLoading(true);
+    try {
+      const q = query(collection(db, 'payments'), where('email', '==', user.email));
+      const querySnapshot = await getDocs(q);
+      const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setOrders(fetchedOrders);
+    } catch (err) {
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -161,7 +245,24 @@ function Orders({ user }) {
         </div>
         )}
         {/* Show order details modal if an order is selected */}
-        <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+        <OrderDetailsModal 
+          order={selectedOrder} 
+          onClose={() => setSelectedOrder(null)}
+          onPayRest={() => {
+            setPayRestOrder(selectedOrder);
+            setShowPayRest(true);
+          }}
+        />
+        <PayRestModal 
+          order={payRestOrder} 
+          open={showPayRest}
+          onClose={() => setShowPayRest(false)}
+          onPaid={async () => {
+            setShowPayRest(false);
+            setSelectedOrder(null);
+            await refreshOrders();
+          }}
+        />
       </div>
     </main>
   );
