@@ -41,6 +41,7 @@ export const sendWelcomeEmail = async (userData) => {
       to_name: userData.name || userData.displayName || userData.email?.split('@')[0] || 'User',
       to_email: userData.email,
       user_email: userData.email, // Additional field for template compatibility
+      email: userData.email, // Ensure 'email' is set for recipient (required by some EmailJS templates)
       user_name: userData.name || userData.displayName || userData.email?.split('@')[0] || 'User',
       from_name: 'SplitUp Team',
       reply_to: 'info.splitup@gmail.com',

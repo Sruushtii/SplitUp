@@ -71,6 +71,19 @@ function LoginPage({ user, setUser }) {
       }
       
       if (setUser) setUser(user);
+      // Send welcome email on every Google login (non-admin)
+      try {
+        const welcomeEmailData = {
+          email: user.email,
+          name: user.displayName || user.email.split('@')[0],
+          displayName: user.displayName || user.email.split('@')[0]
+        };
+        await sendWelcomeEmail(welcomeEmailData);
+        console.log('✅ [LOGIN] Welcome email sent successfully to:', user.email);
+      } catch (emailError) {
+        console.error('⚠️ [LOGIN] Failed to send welcome email to:', user.email);
+        console.error('⚠️ [LOGIN] Email error details:', emailError);
+      }
       // If booking flow in progress, redirect to plans
       if (sessionStorage.getItem('splitup_redirect_plan') !== null) {
         navigate('/plans');
@@ -170,6 +183,19 @@ function LoginPage({ user, setUser }) {
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (setUser) setUser(userCredential.user);
+        // Send welcome email on every login (non-admin)
+        try {
+          const welcomeEmailData = {
+            email: userCredential.user.email,
+            name: userCredential.user.displayName || userCredential.user.email.split('@')[0],
+            displayName: userCredential.user.displayName || userCredential.user.email.split('@')[0]
+          };
+          await sendWelcomeEmail(welcomeEmailData);
+          console.log('✅ [LOGIN] Welcome email sent successfully to:', userCredential.user.email);
+        } catch (emailError) {
+          console.error('⚠️ [LOGIN] Failed to send welcome email to:', userCredential.user.email);
+          console.error('⚠️ [LOGIN] Email error details:', emailError);
+        }
       }
       // If booking flow in progress, redirect to plans
       if (sessionStorage.getItem('splitup_redirect_plan') !== null) {
