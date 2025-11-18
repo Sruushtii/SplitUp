@@ -51,39 +51,9 @@ function LoginPage({ user, setUser }) {
         // Save user to database
         await setDoc(userRef, userData);
         
-        // Send welcome email to new user
-        console.log('🎉 [SIGNUP] New Google user detected, sending welcome email...');
-        try {
-          const welcomeEmailData = {
-            email: user.email,
-            name: user.displayName || user.email.split('@')[0],
-            displayName: user.displayName
-          };
-          console.log('📧 [SIGNUP] Preparing welcome email with data:', welcomeEmailData);
-          
-          await sendWelcomeEmail(welcomeEmailData);
-          console.log('✅ [SIGNUP] Welcome email sent successfully to:', user.email);
-        } catch (emailError) {
-          console.error('⚠️ [SIGNUP] Failed to send welcome email to:', user.email);
-          console.error('⚠️ [SIGNUP] Email error details:', emailError);
-          // Don't block signup if email fails
-        }
       }
       
       if (setUser) setUser(user);
-      // Send welcome email on every Google login (non-admin)
-      try {
-        const welcomeEmailData = {
-          email: user.email,
-          name: user.displayName || user.email.split('@')[0],
-          displayName: user.displayName || user.email.split('@')[0]
-        };
-        await sendWelcomeEmail(welcomeEmailData);
-        console.log('✅ [LOGIN] Welcome email sent successfully to:', user.email);
-      } catch (emailError) {
-        console.error('⚠️ [LOGIN] Failed to send welcome email to:', user.email);
-        console.error('⚠️ [LOGIN] Email error details:', emailError);
-      }
       // If booking flow in progress, redirect to plans
       if (sessionStorage.getItem('splitup_redirect_plan') !== null) {
         navigate('/plans');
@@ -161,41 +131,11 @@ function LoginPage({ user, setUser }) {
           createdAt: serverTimestamp(),
         });
         
-        // Send welcome email to new user
-        console.log('🎉 [SIGNUP] New email user created, sending welcome email...');
-        try {
-          const welcomeEmailData = {
-            email: user.email,
-            name: name,
-            displayName: name
-          };
-          console.log('📧 [SIGNUP] Preparing welcome email with data:', welcomeEmailData);
-          
-          await sendWelcomeEmail(welcomeEmailData);
-          console.log('✅ [SIGNUP] Welcome email sent successfully to:', user.email);
-        } catch (emailError) {
-          console.error('⚠️ [SIGNUP] Failed to send welcome email to:', user.email);
-          console.error('⚠️ [SIGNUP] Email error details:', emailError);
-          // Don't block signup if email fails
-        }
         
         if (setUser) setUser(user);
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (setUser) setUser(userCredential.user);
-        // Send welcome email on every login (non-admin)
-        try {
-          const welcomeEmailData = {
-            email: userCredential.user.email,
-            name: userCredential.user.displayName || userCredential.user.email.split('@')[0],
-            displayName: userCredential.user.displayName || userCredential.user.email.split('@')[0]
-          };
-          await sendWelcomeEmail(welcomeEmailData);
-          console.log('✅ [LOGIN] Welcome email sent successfully to:', userCredential.user.email);
-        } catch (emailError) {
-          console.error('⚠️ [LOGIN] Failed to send welcome email to:', userCredential.user.email);
-          console.error('⚠️ [LOGIN] Email error details:', emailError);
-        }
       }
       // If booking flow in progress, redirect to plans
       if (sessionStorage.getItem('splitup_redirect_plan') !== null) {
