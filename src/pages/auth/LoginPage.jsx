@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { auth, db, googleProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, doc, setDoc, getDoc, serverTimestamp } from '../../services/firebase';
-import { sendWelcomeEmail } from '../../services/emailService';
 
 function LoginPage({ user, setUser }) {
   const [searchParams] = useSearchParams();
