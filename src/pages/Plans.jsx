@@ -11,7 +11,7 @@ import { sendOrderConfirmationEmail } from '../services/emailService';
 const PLATFORM_FEE = 5; // Only ₹5 total convenience fee
 const GST_RATE = 0; // No GST - keeping prices minimal for users
 
-const subscriptions = [
+export const subscriptions = [
   {
     name: 'Netflix',
     logo: '/netflix.png',

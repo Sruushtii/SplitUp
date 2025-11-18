@@ -132,7 +132,8 @@ function Navbar({ user, setUser }) {
           {/* If admin, show admin navbar */}
           {user && user.isAdmin ? (
             <nav className="flex items-center gap-8">
-              <span className="text-lg font-semibold text-slate-700">Admin Portal</span>
+              <Link to="/admin" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors">Dashboard</Link>
+              <Link to="/admin/groups" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors">Groups</Link>
               <button onClick={handleLogout} className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors">Log out</button>
             </nav>
           ) : (

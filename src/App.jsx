@@ -42,6 +42,7 @@ import Orders from "./pages/Orders";
 import { auth } from './services/firebase';
 // Import admin-specific page
 import AdminPortal from './pages/AdminPortal';
+const AdminGroups = React.lazy(() => import('./pages/AdminGroups.jsx'));
 
 // =========================
 // HELPER COMPONENTS
@@ -187,6 +188,13 @@ function App() {
         <Route path="/admin" element={
           <AdminRoute user={user}>
             <AdminPortal user={user} setUser={setUser} />
+          </AdminRoute>
+        } />
+        <Route path="/admin/groups" element={
+          <AdminRoute user={user}>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <AdminGroups />
+            </React.Suspense>
           </AdminRoute>
         } />
       </Routes>

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, collection, query, where, getDocs } from '../services/firebase';
+import { subscriptions } from './Plans';
 
 // Order status sections
 const statusSections = [
@@ -169,6 +170,40 @@ function Orders({ user }) {
               <li className="py-2 flex justify-between"><span className="text-slate-500">Amount Paid</span><span className="font-medium text-green-700">₹{order.amountPaid}</span></li>
               <li className="py-2 flex justify-between"><span className="text-slate-500">Amount Remaining</span><span className="font-medium text-red-700">₹{order.amountRemaining}</span></li>
               <li className="py-2 flex justify-between"><span className="text-slate-500">Total Amount</span><span className="font-medium text-slate-800">₹{order.totalAmount}</span></li>
+              <li className="py-2 flex justify-between"><span className="text-slate-500">Expiry</span><span className="font-medium text-slate-800">{(() => {
+                function getPlanDuration(order) {
+                  const service = subscriptions.find(
+                    s => s.name.toLowerCase() === (order.subscriptionType || '').toLowerCase()
+                  );
+                  if (!service) return 30;
+                  const plan = service.plans.find(
+                    p => p.name.toLowerCase() === (order.planType || '').toLowerCase() || p.id === order.planType
+                  );
+                  if (!plan) return 30;
+                  const name = (plan.name || '').toLowerCase();
+                  if (name.includes('year') || name.includes('annual')) return 365;
+                  if (name.includes('3 month')) return 90;
+                  if (name.includes('monthly') || name.includes('month')) return 30;
+                  const durDetail = (plan.details || []).find(d => /month|year/i.test(d.value));
+                  if (durDetail) {
+                    if (/year/i.test(durDetail.value)) return 365;
+                    if (/3 month/i.test(durDetail.value)) return 90;
+                    if (/month/i.test(durDetail.value)) return 30;
+                  }
+                  return 30;
+                }
+                let expiry;
+                const duration = getPlanDuration(order);
+                if (order.subscriptionEnds) {
+                  expiry = order.subscriptionEnds.toDate ? order.subscriptionEnds.toDate() : new Date(order.subscriptionEnds);
+                } else if (order.createdAt) {
+                  const base = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+                  expiry = new Date(base.getTime() + duration * 24 * 60 * 60 * 1000);
+                } else {
+                  expiry = null;
+                }
+                return expiry ? expiry.toLocaleDateString() : 'N/A';
+              })()}</span></li>
               {order.timestamp && <li className="py-2 flex justify-between"><span className="text-slate-500">Booked On</span><span className="font-medium text-slate-800">{order.timestamp.toDate ? order.timestamp.toDate().toLocaleString() : order.timestamp}</span></li>}
             </ul>
             {/* Pay Rest Amount button */}
@@ -225,6 +260,47 @@ function Orders({ user }) {
                   <div key={order.id} className="flex flex-col sm:flex-row items-center sm:items-stretch bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden transition hover:shadow-md">
                     <div className="flex-1 p-5 flex flex-col justify-center min-w-0">
                         <div className="font-bold text-lg text-slate-900 mb-1 truncate">{order.planType || order.subscriptionType}</div>
+                        <div className="text-xs text-slate-500 mb-1">
+                          Expiry: {(() => {
+                            // Helper to get plan duration
+                            function getPlanDuration(order) {
+                              // Try to match by subscriptionType and planType
+                              const service = subscriptions.find(
+                                s => s.name.toLowerCase() === (order.subscriptionType || '').toLowerCase()
+                              );
+                              if (!service) return 30; // default 30 days
+                              // Try to match plan by planType or name
+                              const plan = service.plans.find(
+                                p => p.name.toLowerCase() === (order.planType || '').toLowerCase() || p.id === order.planType
+                              );
+                              if (!plan) return 30;
+                              // Infer duration from plan name/details
+                              const name = (plan.name || '').toLowerCase();
+                              if (name.includes('year') || name.includes('annual')) return 365;
+                              if (name.includes('3 month')) return 90;
+                              if (name.includes('monthly') || name.includes('month')) return 30;
+                              // Fallback: try details
+                              const durDetail = (plan.details || []).find(d => /month|year/i.test(d.value));
+                              if (durDetail) {
+                                if (/year/i.test(durDetail.value)) return 365;
+                                if (/3 month/i.test(durDetail.value)) return 90;
+                                if (/month/i.test(durDetail.value)) return 30;
+                              }
+                              return 30; // fallback
+                            }
+                            let expiry;
+                            const duration = getPlanDuration(order);
+                            if (order.subscriptionEnds) {
+                              expiry = order.subscriptionEnds.toDate ? order.subscriptionEnds.toDate() : new Date(order.subscriptionEnds);
+                            } else if (order.createdAt) {
+                              const base = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+                              expiry = new Date(base.getTime() + duration * 24 * 60 * 60 * 1000);
+                            } else {
+                              expiry = null;
+                            }
+                            return expiry ? expiry.toLocaleDateString() : 'N/A';
+                          })()}
+                        </div>
                         <button onClick={() => setSelectedOrder(order)} className="mt-2 px-4 py-2 rounded-lg border border-blue-600 text-blue-600 font-semibold bg-white hover:bg-blue-50 transition w-max text-sm">View Details</button>
                     </div>
                     <div className="sm:w-48 w-full h-32 sm:h-auto flex items-center justify-center bg-slate-100 border-l border-slate-200">
