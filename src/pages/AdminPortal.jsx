@@ -82,6 +82,7 @@ function AdminPortal({ user }) {
     const groupMap = {};
     orders.forEach(order => {
       if (!order.planType) return;
+      if (order.status !== 'pending') return; // Only include pending users
       if (!groupMap[order.planType]) groupMap[order.planType] = [];
       groupMap[order.planType].push(order);
     });
