@@ -77,15 +77,16 @@ function AdminPortal({ user }) {
     }
   }, [user]);
 
-  // Group orders by planType for group management UI
+  // Group orders by subscriptionType (service name) for group management UI
   useEffect(() => {
     const groupMap = {};
     orders.forEach(order => {
-      if (!order.planType) return;
+      if (!order.subscriptionType) return;
       // Only show users who have fully paid (amountRemaining === 0) and are pending
       if (order.status !== 'pending' || order.amountRemaining > 0) return;
-      if (!groupMap[order.planType]) groupMap[order.planType] = [];
-      groupMap[order.planType].push(order);
+      const key = `${order.subscriptionType} - ${order.planType}`; // Group by service + plan
+      if (!groupMap[key]) groupMap[key] = [];
+      groupMap[key].push(order);
     });
     setGroups(Object.entries(groupMap).map(([planType, members], i) => ({ id: i + 1, planType, members })));
   }, [orders]);
@@ -326,7 +327,7 @@ function AdminPortal({ user }) {
                           <span className="text-blue-700 font-bold text-lg">{index + 1}</span>
                         </div>
                         <div>
-                          <h3 className="font-bold text-lg text-slate-900">{getServiceNameFromPlanType(group.planType)}</h3>
+                          <h3 className="font-bold text-lg text-slate-900">{group.planType}</h3>
                           <p className="text-xs text-slate-500">Subscription Group</p>
                         </div>
                       </div>
@@ -374,7 +375,7 @@ function AdminPortal({ user }) {
             // Subgroup management UI
             <div>
               <button className="mb-4 px-3 py-1 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400" onClick={() => setSelectedGroup(null)}>&larr; Back to Groups</button>
-              <h3 className="font-bold text-lg text-slate-900 mb-2">{getServiceNameFromPlanType(selectedGroup.planType)} Subgroups</h3>
+              <h3 className="font-bold text-lg text-slate-900 mb-2">{selectedGroup.planType} Subgroups</h3>
               <div className="flex gap-2 mb-4 items-center">
                 <span className="text-xs text-slate-500">Split members into groups of</span>
                 {[2, 3, 4, 5, 6].map(size => (
@@ -501,7 +502,7 @@ function AdminPortal({ user }) {
                     <div key={o.id} className="px-4 py-3 bg-white border border-green-200 rounded shadow-sm flex flex-col min-w-[200px] max-w-xs">
                       <div className="font-bold text-slate-800 text-base truncate mb-1">{o.name}</div>
                       <div className="text-xs text-slate-500 truncate mb-1">{o.email}</div>
-                      <div className="text-xs text-green-700 font-semibold mb-2 truncate">{getServiceNameFromPlanType(o.planType) || o.subscriptionType}</div>
+                      <div className="text-xs text-green-700 font-semibold mb-2 truncate">{o.subscriptionType}</div>
                       <div className="text-green-900 text-sm font-bold">₹{o.amountPaid}</div>
                     </div>
                   ))}
@@ -533,7 +534,7 @@ function AdminPortal({ user }) {
                 <tr key={order.id} className="border-b border-slate-100 hover:bg-blue-50 cursor-pointer transition" style={{ height: '56px' }} onClick={() => setSelectedOrder(order)}>
                   <td className="px-4 py-2 text-base">{order.name}</td>
                   <td className="px-4 py-2 text-base">{order.email}</td>
-                  <td className="px-4 py-2 text-base">{getServiceNameFromPlanType(order.planType) || order.subscriptionType}</td>
+                  <td className="px-4 py-2 text-base">{order.subscriptionType}</td>
                   <td className="px-4 py-2">
                     <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${statusColors[order.status] || 'bg-slate-100 text-slate-700'}`}>{order.status}</span>
                   </td>
@@ -604,7 +605,7 @@ function AdminPortal({ user }) {
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Enter Subscription Credentials</h2>
                   <p className="text-sm text-slate-500">
-                    {currentGroup && `For ${getServiceNameFromPlanType(currentGroup.planType)}`}
+                    {currentGroup && `For ${currentGroup.planType}`}
                   </p>
                 </div>
               </div>

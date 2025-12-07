@@ -15,7 +15,9 @@ function AdminGroups() {
         const orders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const groupMap = {};
         orders.forEach(order => {
-          const key = String(order.planType || order.subscriptionType || 'Other');
+          const key = order.subscriptionType && order.planType
+            ? `${order.subscriptionType} - ${order.planType}`
+            : String(order.subscriptionType || order.planType || 'Other');
           if (!groupMap[key]) groupMap[key] = [];
           groupMap[key].push(order);
         });
@@ -23,7 +25,7 @@ function AdminGroups() {
           Object.entries(groupMap).map(([planType, members], i) => ({
             id: String(i + 1),
             planType: String(planType),
-            service: getServiceNameFromPlanType(planType) || String(planType),
+            service: String(planType),
             members
           }))
         );
