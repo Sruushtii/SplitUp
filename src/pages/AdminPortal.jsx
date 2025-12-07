@@ -41,17 +41,17 @@ function AdminPortal({ user }) {
         if (!user || !user.isAdmin) {
           throw new Error('Admin access required');
         }
-        
+
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const querySnapshot = await getDocs(collection(db, 'payments'));
-        
+
         if (querySnapshot.empty) {
           setOrders([]);
           showToast('No orders found in database', 'success');
           return;
         }
-        
+
         const fetchedOrders = querySnapshot.docs.map(doc => {
           const data = doc.data();
           return {
@@ -71,7 +71,7 @@ function AdminPortal({ user }) {
         setLoading(false);
       }
     };
-    
+
     if (user && user.isAdmin) {
       fetchOrders();
     }
@@ -87,7 +87,7 @@ function AdminPortal({ user }) {
       if (!groupMap[order.planType]) groupMap[order.planType] = [];
       groupMap[order.planType].push(order);
     });
-    setGroups(Object.entries(groupMap).map(([planType, members], i) => ({ id: i+1, planType, members })));
+    setGroups(Object.entries(groupMap).map(([planType, members], i) => ({ id: i + 1, planType, members })));
   }, [orders]);
 
   // Change order status (pending/active/completed)
@@ -95,7 +95,7 @@ function AdminPortal({ user }) {
     setStatusUpdating(orderId);
     try {
       console.log(`Updating order ${orderId} to status: ${newStatus}`);
-      await updateDoc(doc(db, 'payments', orderId), { 
+      await updateDoc(doc(db, 'payments', orderId), {
         status: newStatus,
         updatedAt: new Date()
       });
@@ -118,55 +118,81 @@ function AdminPortal({ user }) {
     }, 1000);
   };
 
-  // Send emails to all members of a subgroup
-  const sendSubgroupEmails = async (subgroup, group) => {
+  // State for credential entry modal
+  const [showCredentialModal, setShowCredentialModal] = useState(false);
+  const [credentialData, setCredentialData] = useState({
+    username: '',
+    password: '',
+    additionalInfo: ''
+  });
+  const [currentSubgroup, setCurrentSubgroup] = useState(null);
+  const [currentGroup, setCurrentGroup] = useState(null);
+
+  // Open credential entry modal
+  const openCredentialModal = (subgroup, group) => {
     if (!subgroup || !Array.isArray(subgroup) || subgroup.length === 0) {
       showToast('No members in this subgroup', 'error');
       return;
     }
+    setCurrentSubgroup(subgroup);
+    setCurrentGroup(group);
+    setShowCredentialModal(true);
+    setCredentialData({ username: '', password: '', additionalInfo: '' });
+  };
+
+  // Send credentials to all members of a subgroup
+  const sendCredentialsToSubgroup = async () => {
+    if (!credentialData.username || !credentialData.password) {
+      showToast('Please enter both username and password', 'error');
+      return;
+    }
+
     let successCount = 0;
     let failCount = 0;
-    for (const member of subgroup) {
+
+    for (const member of currentSubgroup) {
       try {
-        await sendWelcomeEmail({
-          email: member.email,
-          name: member.name,
-          service_name: getServiceNameFromPlanType(group.planType),
-          group_name: group.planType,
-          subscription_period: '1 Month', // or dynamic if available
-          members: subgroup.map(m => m.email).join(', '),
-          subscription_username: 'splitupdemo@gmail.com',
-          subscription_password: 'demo1234',
-          platform_url: 'https://splitup.sruushtii.in',
+        // Update order with credentials
+        await updateDoc(doc(db, 'payments', member.id), {
+          status: 'active',
+          credentials: {
+            username: credentialData.username,
+            password: credentialData.password,
+            additionalInfo: credentialData.additionalInfo,
+            sentAt: new Date()
+          },
+          updatedAt: new Date()
         });
-        // Auto-update status from 'pending' to 'active' in Firestore
-        if (member.status === 'pending' && member.id) {
-          try {
-            await updateDoc(doc(db, 'payments', member.id), { status: 'active', updatedAt: new Date() });
-          } catch (updateErr) {
-            console.error('Failed to update status for', member.email, updateErr);
-          }
-        }
-        // Also update local state for immediate UI feedback
+
+        // Update local state for immediate UI feedback
         setOrders(prevOrders => prevOrders.map(order =>
-          order.id === member.id ? { ...order, status: 'active', updatedAt: new Date() } : order
+          order.id === member.id ? {
+            ...order,
+            status: 'active',
+            credentials: {
+              username: credentialData.username,
+              password: credentialData.password,
+              additionalInfo: credentialData.additionalInfo,
+              sentAt: new Date()
+            },
+            updatedAt: new Date()
+          } : order
         ));
         successCount++;
       } catch (err) {
         failCount++;
-        console.error('Failed to send email to', member.email, err);
+        console.error('Failed to save credentials for', member.email, err);
       }
     }
-    if (successCount > 0) showToast(`Sent ${successCount} email(s) successfully`, 'success');
-    if (failCount > 0) showToast(`Failed to send ${failCount} email(s)`, 'error');
-    // Remove non-pending users from local state
-    setOrders(prevOrders => prevOrders.map(order =>
-      subgroup.some(m => m.id === order.id) && order.status === 'pending'
-        ? { ...order, status: 'active' }
-        : order
-    ));
-    // No need to manually update groups; let useEffect handle it based on orders
 
+    if (successCount > 0) showToast(`Credentials sent to ${successCount} user(s) successfully`, 'success');
+    if (failCount > 0) showToast(`Failed to send credentials to ${failCount} user(s)`, 'error');
+
+    // Close modal and reset
+    setShowCredentialModal(false);
+    setCredentialData({ username: '', password: '', additionalInfo: '' });
+    setCurrentSubgroup(null);
+    setCurrentGroup(null);
   };
 
   // Simulate adding a new admin (UI only)
@@ -266,9 +292,9 @@ function AdminPortal({ user }) {
             <h2 className="text-2xl font-bold text-slate-900">Manage Groups</h2>
             <p className="text-sm text-slate-500 mt-1">View and manage subscription groups</p>
           </div>
-          <button 
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400" 
-            onClick={onClose} 
+          <button
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onClick={onClose}
             aria-label="Close"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -387,11 +413,11 @@ function AdminPortal({ user }) {
                   ))}
                 </div>
               </div>
-              <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 flex items-center justify-center gap-2" onClick={async () => await sendSubgroupEmails(subgroups[selectedSubgroupIdx], selectedGroup)}>
+              <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 flex items-center justify-center gap-2" onClick={() => openCredentialModal(subgroups[selectedSubgroupIdx], selectedGroup)}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm-4 4v1m0-5h1M4 12h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                 </svg>
-                Send Email to Subgroup
+                Send Credentials to Subgroup
               </button>
             </div>
           )}
@@ -399,7 +425,7 @@ function AdminPortal({ user }) {
 
         {/* Fixed Footer */}
         <div className="p-6 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
-          <button 
+          <button
             className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 flex items-center justify-center gap-2"
             onClick={() => showToast('Group creation feature coming soon!', 'success')}
           >
@@ -504,7 +530,7 @@ function AdminPortal({ user }) {
             </thead>
             <tbody>
               {filteredOrders.map(order => (
-                <tr key={order.id} className="border-b border-slate-100 hover:bg-blue-50 cursor-pointer transition" style={{height: '56px'}} onClick={() => setSelectedOrder(order)}>
+                <tr key={order.id} className="border-b border-slate-100 hover:bg-blue-50 cursor-pointer transition" style={{ height: '56px' }} onClick={() => setSelectedOrder(order)}>
                   <td className="px-4 py-2 text-base">{order.name}</td>
                   <td className="px-4 py-2 text-base">{order.email}</td>
                   <td className="px-4 py-2 text-base">{getServiceNameFromPlanType(order.planType) || order.subscriptionType}</td>
@@ -553,6 +579,108 @@ function AdminPortal({ user }) {
       <button className="fixed bottom-8 right-8 z-40 bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg text-3xl hover:bg-blue-700" onClick={() => setShowGroupModal(true)} title="Manage Groups">
         +
       </button>
+
+      {/* Credential Entry Modal */}
+      {showCredentialModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-fadeInUp">
+            <button
+              className="absolute -top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 shadow text-slate-700 hover:bg-slate-100 hover:text-blue-600 focus:outline-none"
+              onClick={() => setShowCredentialModal(false)}
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                <path fillRule="evenodd" d="M10 8.586l4.95-4.95a1 1 0 111.414 1.414L11.414 10l4.95 4.95a1 1 0 01-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 01-1.414-1.414L8.586 10l-4.95-4.95A1 1 0 115.05 3.636L10 8.586z" clipRule="evenodd" />
+              </svg>
+            </button>
+
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">Enter Subscription Credentials</h2>
+                  <p className="text-sm text-slate-500">
+                    {currentGroup && `For ${getServiceNameFromPlanType(currentGroup.planType)}`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Username / Email
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 bg-slate-50"
+                    placeholder="Enter subscription username or email"
+                    value={credentialData.username}
+                    onChange={(e) => setCredentialData({ ...credentialData, username: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 bg-slate-50"
+                    placeholder="Enter subscription password"
+                    value={credentialData.password}
+                    onChange={(e) => setCredentialData({ ...credentialData, password: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Additional Info (Optional)
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 bg-slate-50 resize-none"
+                    placeholder="Any additional instructions or notes..."
+                    rows="3"
+                    value={credentialData.additionalInfo}
+                    onChange={(e) => setCredentialData({ ...credentialData, additionalInfo: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-6">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-xs text-blue-700">
+                    These credentials will be saved to each user's order and visible in their Orders page.
+                    {currentSubgroup && ` This will be sent to ${currentSubgroup.length} user(s).`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition-colors"
+                  onClick={() => setShowCredentialModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={sendCredentialsToSubgroup}
+                  disabled={!credentialData.username || !credentialData.password}
+                >
+                  Send Credentials
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,10 +11,24 @@ function UserDetailsForm({ open, onClose, onPay, plan, user }) {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !phone) {
+
+    // Validate name
+    if (!name) {
       setError('Please fill all fields');
       return;
     }
+
+    // Validate phone number - must be exactly 10 digits
+    const phoneRegex = /^\d{10}$/;
+    if (!phone) {
+      setError('Please enter your phone number');
+      return;
+    }
+    if (!phoneRegex.test(phone)) {
+      setError('Phone number must be exactly 10 digits');
+      return;
+    }
+
     setError('');
     onPay({ name, email: user?.email, phone }); // Pass details to parent
   };
@@ -51,7 +65,9 @@ function UserDetailsForm({ open, onClose, onPay, plan, user }) {
               placeholder="Phone Number"
               className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 bg-slate-50"
               value={phone}
-              onChange={e => setPhone(e.target.value)}
+              onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+              maxLength="10"
+              pattern="\d{10}"
               required
             />
           </div>

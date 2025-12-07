@@ -39,7 +39,7 @@ function Navbar({ user, setUser }) {
   // =========================
   // STATE AND HOOKS
   // =========================
-  
+
   // State to control mobile menu visibility (open/closed)
   const [isOpen, setIsOpen] = useState(false);
   // Ref to the mobile menu DOM element for click-outside detection
@@ -50,16 +50,16 @@ function Navbar({ user, setUser }) {
   const location = useLocation();
   // Hook for programmatic navigation
   const navigate = useNavigate();
-  
+
   // =========================
   // MOBILE MENU CLICK-OUTSIDE DETECTION
   // =========================
-  
+
   // Effect to close mobile menu when user clicks outside of it
   useEffect(() => {
     // Only set up listeners if menu is open
     if (!isOpen) return;
-    
+
     // Function to handle clicks outside the menu
     function handleClickOutside(event) {
       // If click is outside the menu element, close the menu
@@ -67,11 +67,11 @@ function Navbar({ user, setUser }) {
         setIsOpen(false);
       }
     }
-    
+
     // Add event listeners for both mouse and touch events
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
-    
+
     // Cleanup function to remove event listeners
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -82,14 +82,13 @@ function Navbar({ user, setUser }) {
   // =========================
   // NAVIGATION CONFIGURATION
   // =========================
-  
+
   // Define navigation links - Orders link only shown to logged-in users
   const navLinks = [
     { name: 'Home', href: '/' },                                    // Landing page
     { name: 'Plans', href: '/plans' },                              // Subscription plans
     ...(user ? [{ name: 'Orders', href: '/orders' }] : []),         // User orders (conditional)
     { name: 'Reviews', href: '/#testimonials' },                    // Testimonials section
-    { name: 'Blog', href: '/blog' }                                 // Blog page (placeholder)
   ];
 
   // Handle logout for both users and admins

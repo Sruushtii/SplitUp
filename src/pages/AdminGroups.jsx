@@ -56,7 +56,7 @@ function AdminGroups() {
         </div>
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(3)].map((_,i) => (
+            {[...Array(3)].map((_, i) => (
               <div key={i} className="animate-pulse bg-slate-100 h-56 rounded-xl" />
             ))}
           </div>
@@ -66,7 +66,7 @@ function AdminGroups() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredGroups.map((group, idx) => (
               <div key={group.planType + '-' + idx} className="rounded-xl border border-slate-200 shadow bg-white flex flex-col">
-                <div className="flex items-center gap-4 px-6 py-4 rounded-t-xl" style={{background: "linear-gradient(90deg, #e0e7ff 0%, #f0fdfa 100%)"}}>
+                <div className="flex items-center gap-4 px-6 py-4 rounded-t-xl" style={{ background: "linear-gradient(90deg, #e0e7ff 0%, #f0fdfa 100%)" }}>
                   <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-2xl shadow">{String(group.service)?.[0] || '?'}</div>
                   <div className="flex-1 min-w-0">
                     <h2 className="font-bold text-lg text-slate-900 truncate">{String(group.service) || String(group.planType)}</h2>
@@ -88,7 +88,6 @@ function AdminGroups() {
                       </div>
                     ))}
                   </div>
-                  <button title="Add user" className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition shadow w-full">+ Add User</button>
                 </div>
               </div>
             ))}

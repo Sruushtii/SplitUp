@@ -64,36 +64,24 @@ export const subscriptions = [
     priceCheckUrl: 'https://www.spotify.com/in-en/premium/',
     plans: [
       {
-        id: 'spotify-duo',
-        name: 'Duo',
-        totalPrice: 149,
-        splitBetween: 2,
-        price: 75,
+        id: 'spotify-platinum',
+        name: 'Platinum',
+        totalPrice: 299,
+        splitBetween: 3,
+        price: 100,
         details: [
-          { label: 'Total subscription price', value: '₹149/month' },
-          { label: 'Split between', value: '2 people' },
-          { label: 'Your share', value: '₹75/month' },
-          { label: 'Audio quality', value: 'High' },
+          { label: 'Total subscription price', value: '₹299/month' },
+          { label: 'Split between', value: '3 people' },
+          { label: 'Your share', value: '₹100/month' },
+          { label: 'Audio quality', value: 'Lossless (up to ~24-bit/44.1kHz)' },
           { label: 'Ad-free music', value: 'Yes' },
           { label: 'Offline listening', value: 'Yes' },
-          { label: 'Accounts', value: '2 Premium accounts' },
-          { label: 'Supported devices', value: 'Phone, tablet, computer' },
-        ],
-      },
-      {
-        id: 'spotify-family',
-        name: 'Family',
-        totalPrice: 229,
-        splitBetween: 6,
-        price: 38,
-        details: [
-          { label: 'Total subscription price', value: '₹229/month' },
-          { label: 'Split between', value: '6 people' },
-          { label: 'Your share', value: '₹38/month' },
-          { label: 'Audio quality', value: 'High' },
-          { label: 'Ad-free music', value: 'Yes' },
-          { label: 'Offline listening', value: 'Yes' },
-          { label: 'Accounts', value: 'Up to 6 Premium accounts' },
+          { label: 'Accounts', value: 'Up to 3 Platinum accounts' },
+          { label: 'Mix your playlists', value: 'Yes' },
+          { label: 'Your personal AI DJ', value: 'Yes' },
+          { label: 'AI playlist creation', value: 'Yes' },
+          { label: 'Connect your DJ software', value: 'Yes' },
+          { label: 'Cancel anytime', value: 'Yes' },
           { label: 'Supported devices', value: 'Phone, tablet, computer' },
         ],
       },
@@ -318,9 +306,9 @@ const renderLogo = (logoType, name) => {
 };
 
 const LogoPlaceholder = ({ name }) => (
-    <div className="w-full h-full flex items-center justify-center rounded-lg bg-slate-200">
-        <span className="font-bold text-slate-500 text-lg text-center p-2">{name}</span>
-    </div>
+  <div className="w-full h-full flex items-center justify-center rounded-lg bg-slate-200">
+    <span className="font-bold text-slate-500 text-lg text-center p-2">{name}</span>
+  </div>
 );
 
 function Plans({ user, setUser }) {
@@ -375,11 +363,11 @@ function Plans({ user, setUser }) {
     if (!open) return null;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    
+
     // Calculate all fees - No GST, only ₹5 convenience fee on final payment
     const splitAmount = plan.price;
     const totalBookingPayment = bookingAmount; // No fees on booking
-    
+
     const remainingAmount = splitAmount - bookingAmount;
     const totalRemainingPayment = remainingAmount + PLATFORM_FEE; // Only ₹5 fee
 
@@ -408,10 +396,10 @@ function Plans({ user, setUser }) {
           updatedAt: serverTimestamp(),
           status: 'pending',
         };
-        
+
         // Save order to database
         await addDoc(collection(db, 'payments'), orderData);
-        
+
         // Send order confirmation email to user
         try {
           await sendOrderConfirmationEmail(orderData);
@@ -435,8 +423,8 @@ function Plans({ user, setUser }) {
     }
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-2 sm:px-0">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-fadeInUp max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-fadeInUp max-h-[95vh] overflow-y-auto">
           <button
             className="absolute -top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 shadow text-slate-700 hover:bg-slate-100 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all z-10"
             onClick={onClose}
@@ -446,14 +434,14 @@ function Plans({ user, setUser }) {
               <path fillRule="evenodd" d="M10 8.586l4.95-4.95a1 1 0 111.414 1.414L11.414 10l4.95 4.95a1 1 0 01-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 01-1.414-1.414L8.586 10l-4.95-4.95A1 1 0 115.05 3.636L10 8.586z" clipRule="evenodd" />
             </svg>
           </button>
-          <div className="px-6 py-8">
+          <div className="px-4 sm:px-6 py-6 sm:py-8">
             <h3 className="text-xl font-bold text-slate-900 mb-1">Complete Payment</h3>
             <p className="text-sm text-slate-600 mb-6">{subscriptions[selected].name} - {plan.name}</p>
-            
+
             {/* Payment Breakdown */}
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 mb-6">
               <h4 className="font-semibold text-slate-900 mb-3 text-sm">Payment Breakdown</h4>
-              
+
               {/* Booking Payment */}
               <div className="mb-3 pb-3 border-b border-blue-200">
                 <p className="text-xs font-medium text-slate-600 mb-2">Booking Payment (Now)</p>
@@ -469,7 +457,7 @@ function Plans({ user, setUser }) {
                   <p className="text-xs text-green-600 mt-1">✓ No fees on booking!</p>
                 </div>
               </div>
-              
+
               {/* Remaining Payment */}
               <div>
                 <p className="text-xs font-medium text-slate-600 mb-2">Final Payment (Later)</p>
@@ -488,7 +476,7 @@ function Plans({ user, setUser }) {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-3 pt-3 border-t-2 border-blue-300">
                 <div className="flex justify-between font-bold text-base">
                   <span className="text-slate-900">Grand Total</span>
@@ -496,7 +484,7 @@ function Plans({ user, setUser }) {
                 </div>
               </div>
             </div>
-            
+
             <h4 className="font-semibold text-slate-900 mb-3">Select payment method</h4>
             <div className="flex flex-col gap-3 mb-6">
               <button onClick={() => setPaymentMethod('UPI')} className={`w-full py-3 rounded-lg border ${paymentMethod === 'UPI' ? 'border-blue-600 bg-blue-50' : 'border-slate-200'} text-slate-700 font-medium hover:bg-slate-50 transition`}>UPI</button>
@@ -522,13 +510,13 @@ function Plans({ user, setUser }) {
     const currentPlan = service.plans[activePlanIdx];
     const splitAmount = currentPlan.price;
     const bookingAmount = Math.ceil(currentPlan.price * 0.10);
-    
+
     // Calculate fees - No GST, only ₹5 convenience fee on final payment
     const totalBookingPayment = bookingAmount; // No fees on booking
-    
+
     const remainingAmount = splitAmount - bookingAmount;
     const totalRemainingPayment = remainingAmount + PLATFORM_FEE; // Only ₹5 fee added
-    
+
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-2 sm:px-0">
         <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-fadeInUp max-h-[90vh] overflow-y-auto">
@@ -550,7 +538,7 @@ function Plans({ user, setUser }) {
                 {renderLogo(service.logo, service.name)}
               </div>
             </div>
-            
+
             {/* Plan selector - only show if multiple plans */}
             {service.plans.length > 1 && (
               <div className="flex flex-col gap-2">
@@ -560,11 +548,10 @@ function Plans({ user, setUser }) {
                     <button
                       key={plan.id}
                       onClick={() => setActivePlanIdx(idx)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        activePlanIdx === idx
-                          ? 'bg-blue-600 text-white shadow-md'
-                          : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'
-                      }`}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${activePlanIdx === idx
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'
+                        }`}
                     >
                       {plan.name}
                     </button>
@@ -582,7 +569,7 @@ function Plans({ user, setUser }) {
                 </li>
               ))}
             </ul>
-            
+
             {/* Simple pricing summary */}
             <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
               <div className="flex justify-between items-center mb-2">
@@ -608,7 +595,7 @@ function Plans({ user, setUser }) {
                 </div>
               </div>
             </div>
-            
+
             <button
               className="w-full py-3 rounded-lg bg-blue-600 text-white font-bold text-lg shadow hover:bg-blue-700 transition-colors"
               onClick={() => handleBookNow(serviceIdx, activePlanIdx)}
@@ -651,9 +638,9 @@ function Plans({ user, setUser }) {
             {subscriptions.map((service, index) => {
               if (service.status === 'active') {
                 // Show the cheapest plan price for the card
-                const cheapestPlan = service.plans.reduce((min, plan) => 
+                const cheapestPlan = service.plans.reduce((min, plan) =>
                   plan.price < min.price ? plan : min, service.plans[0]);
-                
+
                 return (
                   <button
                     key={`${service.name}-${index}`}
@@ -685,12 +672,12 @@ function Plans({ user, setUser }) {
                 return (
                   <div key={service.name} className="text-left rounded-xl p-2">
                     <div className="relative aspect-square rounded-lg mb-4 flex items-center justify-center p-4 bg-slate-100 border-2 border-dashed border-slate-300">
-                        <LogoPlaceholder name={service.name} />
-                        <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                            <span className="bg-slate-700 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                                Coming Soon
-                            </span>
-                        </div>
+                      <LogoPlaceholder name={service.name} />
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                        <span className="bg-slate-700 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                          Coming Soon
+                        </span>
+                      </div>
                     </div>
                     <div className="px-1">
                       <p className="font-semibold text-slate-500">{service.name}</p>
